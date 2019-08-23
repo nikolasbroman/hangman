@@ -71,7 +71,6 @@ class Hangman
       puts "You have already guessed '#{guess}'. Try a new guess:"
       false
     elsif guess.length != 1 && guess.length != @secret_word.length
-      #todo: check that guess consists only of a-z
       puts "Your guess should be 1 letter or the entire word (#{@secret_word.length} lettters):"
       false
     elsif guess =~ /^[a-z]+$/
