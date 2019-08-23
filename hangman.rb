@@ -3,6 +3,7 @@ class Hangman
   def initialize
     @secret_word
     @secret_word_with_underscores
+    @MAX_GUESSES = 13
     @correct_guesses = []
     @incorrect_guesses = []
     @victory = false
@@ -22,15 +23,29 @@ class Hangman
   def new_round
     set_secret_word
     set_secret_word_with_underscores
-    while guess = get_guess
+    puts
+    puts @secret_word_with_underscores
+    1.upto(@MAX_GUESSES) do |i|
+      puts
+      puts
+      puts "Guess #{i}/#{@MAX_GUESSES}:"
+      guess = get_guess
       check_matches(guess)
       puts
-      puts @secret_word_with_underscores
-      break if @victory #test if this works
-      #check whether guess is correct or incorrect -> add to array
-      #if correct, update @secret_word_with_underscores
-      #check if win
+      if @victory
+        puts @secret_word.split("").join(" ")
+        #todo: declare victory
+        return
+      else
+        puts @secret_word_with_underscores
+      end
+      if @incorrect_guesses.length > 0
+        puts
+        puts "Incorrect guesses: "
+        puts @incorrect_guesses.join(", ")
+      end
     end
+    #todo: declare defeat
   end
 
   def set_secret_word
@@ -46,7 +61,6 @@ class Hangman
   end
 
   def get_guess
-    puts "Next guess:"
     while guess = gets.chomp.downcase
       return guess if check_guess(guess)
     end
