@@ -74,8 +74,11 @@ class Hangman
       #todo: check that guess consists only of a-z
       puts "Your guess should be 1 letter or the entire word (#{@secret_word.length} lettters):"
       false
-    else
+    elsif guess =~ /^[a-z]+$/
       true
+    else
+      puts "Your guess should only consist of letters (a-z):"
+      false
     end
   end
 
