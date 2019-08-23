@@ -1,8 +1,11 @@
+require "yaml"
+
 class Hangman
 
   def initialize
     @secret_word
     @secret_word_with_underscores
+    @guess_index = 1
     @MAX_GUESSES = 13
     @correct_guesses = []
     @incorrect_guesses = []
@@ -22,14 +25,19 @@ class Hangman
 
   def new_round
     set_secret_word
+    puts @secret_word
     set_secret_word_with_underscores
     puts
     puts @secret_word_with_underscores
-    1.upto(@MAX_GUESSES) do |i|
+    while @guess_index <= @MAX_GUESSES
       puts
       puts
-      puts "Guess #{i}/#{@MAX_GUESSES}:"
+      puts "Guess #{@guess_index}/#{@MAX_GUESSES}:"
       guess = get_guess
+      if guess == "save"
+        save_game
+        return
+      end
       check_matches(guess)
       puts
       if @victory
@@ -45,6 +53,7 @@ class Hangman
         puts "Incorrect guesses: "
         puts @incorrect_guesses.join(", ")
       end
+      @guess_index += 1
     end
     puts
     puts "Game over."
@@ -65,8 +74,22 @@ class Hangman
 
   def get_guess
     while guess = gets.chomp.downcase
-      return guess if check_guess(guess)
+      return guess if guess == "save" || check_guess(guess)
     end
+  end
+
+  def save_game
+    serialized = YAML.dump ({
+      secret_word: @secret_word,
+      secret_word_with_underscores: @secret_word_with_underscores,
+      guess_index: @guess_index,
+      correct_guesses: @correct_guesses,
+      incorrect_guesses: @incorrect_guesses
+    })
+    File.open("save.txt", "w"){ |file| file.puts serialized }
+    puts
+    puts "Your game has been saved."
+    puts
   end
 
   def check_guess(guess)
