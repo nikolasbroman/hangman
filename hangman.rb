@@ -34,7 +34,7 @@ class Hangman
       puts
       if @victory
         puts @secret_word.split("").join(" ")
-        #todo: declare victory
+        puts "Congratulations! You did it!"
         return
       else
         puts @secret_word_with_underscores
@@ -45,7 +45,7 @@ class Hangman
         puts @incorrect_guesses.join(", ")
       end
     end
-    #todo: declare defeat
+    puts "Game over. You lost."
   end
 
   def set_secret_word
