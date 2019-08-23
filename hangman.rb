@@ -5,6 +5,7 @@ class Hangman
     @secret_word_with_underscores
     @correct_guesses = []
     @incorrect_guesses = []
+    @victory = false
   end
 
   def play
@@ -14,12 +15,22 @@ class Hangman
   private
 
   def new_game
+    new_round
+  end
+
+
+  def new_round
     set_secret_word
     set_secret_word_with_underscores
-    guess = get_guess
-    #check whether guess is correct or incorrect -> add to array
-    #if correct, update @secret_word_with_underscores
-    #check if win
+    while guess = get_guess
+      check_matches(guess)
+      puts
+      puts @secret_word_with_underscores
+      break if @victory #test if this works
+      #check whether guess is correct or incorrect -> add to array
+      #if correct, update @secret_word_with_underscores
+      #check if win
+    end
   end
 
   def set_secret_word
@@ -46,11 +57,32 @@ class Hangman
       puts "You have already guessed '#{guess}'. Try a new guess:"
       false
     elsif guess.length != 1 && guess.length != @secret_word.length
+      #todo: check that guess consists only of a-z
       puts "Your guess should be 1 letter or the entire word (#{@secret_word.length} lettters):"
       false
     else
       true
     end
+  end
+
+  def check_matches(guess)
+    if guess.length > 1 && guess == @secret_word
+      @victory = true
+    elsif @secret_word.include?(guess)
+      add_letters(guess)
+      @correct_guesses << guess
+    else
+      @incorrect_guesses << guess
+    end
+  end
+
+  def add_letters(guess)
+    new_word = @secret_word_with_underscores.split(" ").join("")
+    @secret_word.split("").each_with_index do |letter, index|
+      new_word[index] = guess if letter == guess
+    end
+    @victory = true if new_word == @secret_word
+    @secret_word_with_underscores = new_word.split("").join(" ")
   end
 
 end
