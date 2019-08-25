@@ -11,6 +11,7 @@ class Hangman
     @correct_guesses = []
     @incorrect_guesses = []
     @victory = false
+    @exit = false
   end
 
   def play
@@ -19,10 +20,15 @@ class Hangman
 
   private
 
+  def before_prompt
+    print "> "
+  end
+
   def new_game_or_load_game
     puts "Play a new game or load previous game?"
     puts "1) New Game"
     puts "2) Load Game"
+    before_prompt
     while input = gets.chomp.downcase
       case input
       when "1", "new", "newgame", "new game"
@@ -33,6 +39,7 @@ class Hangman
         break
       else
         puts "Please try again:"
+        before_prompt
       end
     end
     new_game
@@ -41,17 +48,46 @@ class Hangman
 
   def new_game
     new_round
+    while !@exit && ask_if_new_round
+      new_round
+    end
+    puts
+    puts "Thank you for playing."
+    puts
+  end
+
+  def ask_if_new_round
+    puts
+    puts "Play a new round? (yes/no)"
+    before_prompt
+    while input = gets.chomp.downcase
+      case input
+      when "y", "yes"
+        return true
+      when "n", "no"
+        return false
+      else
+        puts "Please answer yes or no."
+        before_prompt
+      end
+    end
   end
 
 
   def new_round
+    puts
     if @loading
+      @exit = false
       load_game
     else
       set_secret_word
       set_secret_word_with_underscores
+      @guess_index = 1
+      @correct_guesses = []
+      @incorrect_guesses = []
     end
     begin_guessing
+    @loading = false
   end
 
   def load_game
@@ -82,7 +118,7 @@ class Hangman
       puts "Guess #{@guess_index}/#{@MAX_GUESSES}:"
       guess = get_guess
       if guess == "save"
-        save_game
+        save_game_and_exit
         return
       end
       check_matches(guess)
@@ -90,6 +126,7 @@ class Hangman
         @secret_word_with_underscores = @secret_word.split("").join(" ")
         update_display
         puts "Congratulations! You won!"
+        @victory = false
         return
       else
         update_display
@@ -102,23 +139,25 @@ class Hangman
   end
 
   def update_display
-    puts
-    puts @secret_word_with_underscores
     if @incorrect_guesses.length > 0
       puts
       puts "Incorrect guesses: "
       puts @incorrect_guesses.join(", ")
     end
     puts
+    puts @secret_word_with_underscores
+    puts
   end
 
   def get_guess
+    before_prompt
     while guess = gets.chomp.downcase
       return guess if guess == "save" || check_guess(guess)
+      before_prompt
     end
   end
 
-  def save_game
+  def save_game_and_exit
     serialized = YAML.dump ({
       secret_word: @secret_word,
       secret_word_with_underscores: @secret_word_with_underscores,
@@ -129,7 +168,7 @@ class Hangman
     File.open("save.txt", "w"){ |file| file.puts serialized }
     puts
     puts "Your game has been saved."
-    puts
+    @exit = true
   end
 
   def check_guess(guess)
