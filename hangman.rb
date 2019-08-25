@@ -3,6 +3,7 @@ require "yaml"
 class Hangman
 
   def initialize
+    @loading = false
     @secret_word
     @secret_word_with_underscores
     @guess_index = 1
@@ -13,10 +14,30 @@ class Hangman
   end
 
   def play
-    new_game
+    new_game_or_load_game
   end
 
   private
+
+  def new_game_or_load_game
+    puts "Play a new game or load previous game?"
+    puts "1) New Game"
+    puts "2) Load Game"
+    while input = gets.chomp.downcase
+      case input
+      when "1", "new", "newgame", "new game"
+        @loading = false
+        break
+      when "2", "load", "loadgame", "load game"
+        @loading = true
+        break
+      else
+        puts "Please try again:"
+      end
+    end
+    new_game
+  end
+
 
   def new_game
     new_round
@@ -24,40 +45,22 @@ class Hangman
 
 
   def new_round
-    set_secret_word
-    puts @secret_word
-    set_secret_word_with_underscores
-    puts
-    puts @secret_word_with_underscores
-    while @guess_index <= @MAX_GUESSES
-      puts
-      puts
-      puts "Guess #{@guess_index}/#{@MAX_GUESSES}:"
-      guess = get_guess
-      if guess == "save"
-        save_game
-        return
-      end
-      check_matches(guess)
-      puts
-      if @victory
-        puts @secret_word.split("").join(" ")
-        puts
-        puts "Congratulations! You won!"
-        return
-      else
-        puts @secret_word_with_underscores
-      end
-      if @incorrect_guesses.length > 0
-        puts
-        puts "Incorrect guesses: "
-        puts @incorrect_guesses.join(", ")
-      end
-      @guess_index += 1
+    if @loading
+      load_game
+    else
+      set_secret_word
+      set_secret_word_with_underscores
     end
-    puts
-    puts "Game over."
-    puts "The word was '#{@secret_word}'."
+    begin_guessing
+  end
+
+  def load_game
+    data = YAML.load File.read("save.txt")
+    @secret_word = data[:secret_word]
+    @secret_word_with_underscores = data[:secret_word_with_underscores]
+    @guess_index = data[:guess_index]
+    @correct_guesses = data[:correct_guesses]
+    @incorrect_guesses = data[:incorrect_guesses]
   end
 
   def set_secret_word
@@ -70,6 +73,43 @@ class Hangman
 
   def set_secret_word_with_underscores
     @secret_word_with_underscores = ("_" * @secret_word.length).split("").join(" ")
+  end
+
+  def begin_guessing
+    update_display
+    while @guess_index <= @MAX_GUESSES
+      puts
+      puts "Guess #{@guess_index}/#{@MAX_GUESSES}:"
+      guess = get_guess
+      if guess == "save"
+        save_game
+        return
+      end
+      check_matches(guess)
+      if @victory
+        @secret_word_with_underscores = @secret_word.split("").join(" ")
+        update_display
+        puts "Congratulations! You won!"
+        return
+      else
+        update_display
+        @guess_index += 1
+      end
+    end
+    puts
+    puts "Game over."
+    puts "The word was '#{@secret_word}'."
+  end
+
+  def update_display
+    puts
+    puts @secret_word_with_underscores
+    if @incorrect_guesses.length > 0
+      puts
+      puts "Incorrect guesses: "
+      puts @incorrect_guesses.join(", ")
+    end
+    puts
   end
 
   def get_guess
