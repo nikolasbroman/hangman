@@ -15,6 +15,7 @@ class Hangman
   end
 
   def play
+    opening_message
     new_game_or_load_game
   end
 
@@ -22,6 +23,34 @@ class Hangman
 
   def before_prompt
     print "> "
+  end
+
+  def opening_message
+    puts 
+    puts
+    puts "/\\/\\/\\/\\/\\/\\/\\/\\ /\\/\\/\\/\\/\\/\\/\\/\\"
+    puts "\\/\\/\\/\\/\\/\\/ Hangman \\/\\/\\/\\/\\/\\/"
+    puts "/\\/\\/\\/\\/\\/\\\\\\\\\\ /////\\/\\/\\/\\/\\/\\"
+    puts
+    puts "       _________,"
+    puts "     //         |"
+    puts "    ||     programmed_by"
+    puts "    ||     nikolas_broman"
+    puts "    ||"
+    puts "    ||"
+    puts "____||_____The_Rules_____________"
+    puts
+    puts "The computer picks a random word"
+    puts "that is 5-13 characters long."
+    puts
+    puts "You have 13 guesses to figure out"
+    puts "the correct word. Good luck!"
+    puts
+    puts "PS. You can save & exit the game"
+    puts "    with the command 'save'."
+    puts "_________________________________"
+    puts
+    puts
   end
 
   def new_game_or_load_game
